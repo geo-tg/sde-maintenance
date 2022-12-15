@@ -10,7 +10,7 @@ Recommended geodatabase maintenance includes:
 	- Reconciling and posting all child versions
 	- Compressing the database to state 0
 	- Rebuilding all indexes (spatial, attribute, and database)
-	- Analze datasets to recalculate statistics
+	- Analzye datasets to recalculate statistics
 
 Author: 
 	J. Beasley, Geographic Technologies Group (GTG)
