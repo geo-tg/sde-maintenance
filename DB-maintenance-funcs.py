@@ -28,6 +28,8 @@ import logging
 import os
 import sys
 
+arcpy.env.overwriteOutput = True
+
 
 def buildCxn(cfg):
 	'''
@@ -118,6 +120,8 @@ def reconcileVersions(sde):
 	logging.info("Listing all child versions")
 	verList = [ver.name for ver in arcpy.da.ListVersions() if 
 				ver.name.lower() != 'sde.default'] 
+	
+	logging.info(f"    versions: {*verList,}")
 
 	logging.info('Starting the 1st reconciliation')
 
@@ -131,7 +135,7 @@ def reconcileVersions(sde):
 									"FAVOR_TARGET_VERSION",
 									"NO_POST",
 									"KEEP_VERSION",
-									f"{log_fldr}, RecLog_{timestamp}.txt")
+									f"{log_fldr}\RecLog_{timestamp}.txt")
 	logging.info('Reconciling part 1 complete')
 
 	logging.info('Starting the 2nd reconciliation with post')
@@ -146,7 +150,7 @@ def reconcileVersions(sde):
 									"FAVOR_TARGET_VERSION",
 									"POST", 
 									"KEEP_VERSION",
-									f"{log_fldr}, RecLog_{timestamp}.txt")
+									f"{log_fldr}\RecLog_wPost_{timestamp}.txt")
 
 	logging.info('Reconciling part 2 complete')
 	logging.info('Versions have been posted after reconciliation')
@@ -317,13 +321,19 @@ if __name__ == "__main__":
 		cfg = (json.load(f))[env]
 
 	# run funcs
-	sde, built = buildCxn(cfg)
-	reconcileVersions(sde)
-	compressDB(sde)
-	rebuildIndex(sde)
-	analyzeDatasets(sde)
-	if built:
-		deleteCxn(sde)
+	try:
+		sde, built = buildCxn(cfg)
+		reconcileVersions(sde)
+		compressDB(sde)
+		rebuildIndex(sde)
+		analyzeDatasets(sde)
+		if built:
+			deleteCxn(sde)
 
-	logging.info("Completed DB maintenance! \n\n")
+		logging.info("Completed DB maintenance! \n\n")
+
+	except Exception as e:
+
+		logging.error(e, exc_info=True)
+		logging.error("DB maintenance failed to complete. \n\n")
 
